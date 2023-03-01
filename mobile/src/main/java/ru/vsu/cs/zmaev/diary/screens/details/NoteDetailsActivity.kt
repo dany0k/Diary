@@ -18,23 +18,25 @@ class NoteDetailsActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityNoteDetailsBinding
 
-    private lateinit var note: Note
+    private var note: Note? = null
     private lateinit var toolbar: Toolbar
     private lateinit var editText: EditText
 
     fun start(caller: Activity, note: Note?) {
         val intent = Intent(caller, NoteDetailsActivity::class.java)
-        intent.putExtra(EXTRA_NOTE, note)
+        if (note != null) {
+            intent.putExtra(EXTRA_NOTE, note)
+        }
         caller.startActivity(intent)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        DataBindingUtil.setContentView<ActivityNoteDetailsBinding>(
+        binding = DataBindingUtil.setContentView(
             this,
             R.layout.activity_note_details)
 
-        toolbar = binding.toolbar
+        toolbar = binding.activityNoteToolbar
         editText = binding.noteText
 
         setSupportActionBar(toolbar)
@@ -42,9 +44,10 @@ class NoteDetailsActivity : AppCompatActivity() {
         supportActionBar?.setHomeButtonEnabled(true)
 
         title = getString(R.string.note_details_title)
+        note = Note()
         if (intent.hasExtra(EXTRA_NOTE)) {
             note = intent.getParcelableExtra(EXTRA_NOTE)!!
-            editText.setText(note.text)
+            editText.setText(note!!.text)
         } else {
             note = Note()
         }
@@ -60,13 +63,13 @@ class NoteDetailsActivity : AppCompatActivity() {
             android.R.id.home -> finish()
             R.id.action_save -> {
                 if (editText.text.isNotEmpty()) {
-                    note.text = editText.text.toString()
-                    note.done = false
-                    note.timestamp = System.currentTimeMillis()
+                    note?.text = editText.text.toString()
+                    note?.done = false
+                    note?.timestamp = System.currentTimeMillis()
                     if (intent.hasExtra(EXTRA_NOTE)) {
-                        App().getInstance().getNoteDao().update(note)
+                        App.getInstance().getNoteDao().update(note!!)
                     } else {
-                        App().getInstance().getNoteDao().insert(note)
+                        App.getInstance().getNoteDao().insert(note!!)
                     }
                     finish()
                 }
