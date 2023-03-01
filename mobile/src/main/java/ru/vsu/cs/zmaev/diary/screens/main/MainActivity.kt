@@ -10,7 +10,6 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import ru.vsu.cs.zmaev.diary.App
 import ru.vsu.cs.zmaev.diary.R
 import ru.vsu.cs.zmaev.diary.databinding.ActivityMainBinding
 import ru.vsu.cs.zmaev.diary.screens.details.NoteDetailsActivity
@@ -25,7 +24,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         @Suppress("UNUSED_VARIABLE")
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
 

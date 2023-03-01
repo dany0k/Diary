@@ -17,48 +17,44 @@ import ru.vsu.cs.zmaev.diary.screens.details.NoteDetailsActivity
 
 class Adapter : RecyclerView.Adapter<Adapter.NoteViewHolder>() {
 
-    private lateinit var sortedList: SortedList<Note>
+    private var sortedList: SortedList<Note> = SortedList(Note::class.java, object : SortedListAdapterCallback<Note>(this) {
+        override fun compare(o1: Note?, o2: Note?): Int {
 
-    init {
-        sortedList = SortedList(Note::class.java, object : SortedListAdapterCallback<Note>(this) {
-            override fun compare(o1: Note?, o2: Note?): Int {
-
-                if (o2 != null && o1 != null) {
-                    if (!o2.done and o1.done) {
-                        return 1
-                    }
-                    if (o2.done && !o1.done) {
-                        return -1
-                    }
+            if (o2 != null && o1 != null) {
+                if (!o2.done and o1.done) {
+                    return 1
                 }
-                return (o2!!.timestamp - o1!!.timestamp).toInt()
+                if (o2.done && !o1.done) {
+                    return -1
+                }
             }
+            return (o2!!.timestamp - o1!!.timestamp).toInt()
+        }
 
-            override fun onChanged(position: Int, count: Int) {
-                notifyItemRangeChanged(position, count)
-            }
+        override fun onChanged(position: Int, count: Int) {
+            notifyItemRangeChanged(position, count)
+        }
 
-            override fun areContentsTheSame(oldItem: Note?, newItem: Note?): Boolean {
-                return oldItem == newItem
-            }
+        override fun areContentsTheSame(oldItem: Note?, newItem: Note?): Boolean {
+            return oldItem == newItem
+        }
 
-            override fun areItemsTheSame(item1: Note?, item2: Note?): Boolean {
-                return item1!!.uid == item2!!.uid
-            }
+        override fun areItemsTheSame(item1: Note?, item2: Note?): Boolean {
+            return item1!!.uid == item2!!.uid
+        }
 
-            override fun onInserted(position: Int, count: Int) {
-                notifyItemRangeInserted(position, count)
-            }
+        override fun onInserted(position: Int, count: Int) {
+            notifyItemRangeInserted(position, count)
+        }
 
-            override fun onRemoved(position: Int, count: Int) {
-                notifyItemRangeRemoved(position, count)
-            }
+        override fun onRemoved(position: Int, count: Int) {
+            notifyItemRangeRemoved(position, count)
+        }
 
-            override fun onMoved(fromPosition: Int, toPosition: Int) {
-                notifyItemMoved(fromPosition, toPosition)
-            }
-        })
-    }
+        override fun onMoved(fromPosition: Int, toPosition: Int) {
+            notifyItemMoved(fromPosition, toPosition)
+        }
+    })
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NoteViewHolder {
         return NoteViewHolder(LayoutInflater.from(parent.context)
@@ -93,13 +89,13 @@ class Adapter : RecyclerView.Adapter<Adapter.NoteViewHolder>() {
             }
 
             delete.setOnClickListener {
-                App().getInstance().getNoteDao().delete(note)
+                App.getInstance().getNoteDao().delete(note)
             }
 
             completed.setOnCheckedChangeListener { _, isClicked ->
                 if (!silentUpdate) {
                     note.done = isClicked
-                    App().getInstance().getNoteDao().update(note)
+                    App.getInstance().getNoteDao().update(note)
                 }
                 updateStrokeOut()
             }

@@ -6,5 +6,5 @@ import ru.vsu.cs.zmaev.diary.App
 import ru.vsu.cs.zmaev.diary.model.Note
 
 class MainViewModel : ViewModel() {
-    val noteLiveData: LiveData<List<Note>> = App().getInstance().getNoteDao().getAllLiveData()
+    val noteLiveData: LiveData<List<Note>> = App.getInstance().getNoteDao().getAllLiveData()
 }
