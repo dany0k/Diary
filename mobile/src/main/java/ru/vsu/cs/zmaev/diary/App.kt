@@ -4,18 +4,22 @@ import android.app.Application
 import androidx.room.Room
 import ru.vsu.cs.zmaev.diary.data.AppDatabase
 import ru.vsu.cs.zmaev.diary.data.NoteDao
-import ru.vsu.cs.zmaev.diary.screens.main.MainActivity
 
 class App : Application() {
 
-    private lateinit var instance : App
     private lateinit var database : AppDatabase
     private lateinit var noteDao : NoteDao
 
+    companion object {
+        private lateinit var instance : App
+
+        fun getInstance() : App {
+            return instance
+        }
+    }
+
     override fun onCreate() {
         super.onCreate()
-        println("\n\n\n----------ABOBA__________")
-
         instance = this
         database = Room.databaseBuilder(
             this.applicationContext,
@@ -25,10 +29,6 @@ class App : Application() {
             .build()
 
         noteDao = database.noteDao()
-    }
-
-    fun getInstance() : App {
-        return this.instance
     }
 
     fun getNoteDao() : NoteDao {
