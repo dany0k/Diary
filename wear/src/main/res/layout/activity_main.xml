@@ -8,17 +8,26 @@
     tools:context=".MainActivity"
     tools:deviceIds="wear">
 
-    <FrameLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:orientation="vertical"
         android:padding="@dimen/inner_frame_layout_padding"
         app:layout_boxedEdges="all">
+
 
         <TextView
             android:id="@+id/text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center"
             android:text="Здарова, пацики!" />
 
-    </FrameLayout>
+        <Button
+            android:id="@+id/wearableSendButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Send message"/>
+
+    </LinearLayout>
 </androidx.wear.widget.BoxInsetLayout>
