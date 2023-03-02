@@ -11,16 +11,12 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.gms.wearable.*
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import ru.vsu.cs.zmaev.diary.R
 import com.google.android.gms.wearable.DataClient.OnDataChangedListener
-import com.google.android.gms.wearable.DataEvent
-import com.google.android.gms.wearable.DataEventBuffer
-import com.google.android.gms.wearable.DataMapItem
-import com.google.android.gms.wearable.Wearable
 import ru.vsu.cs.zmaev.diary.databinding.ActivityMainBinding
 import ru.vsu.cs.zmaev.diary.screens.details.NoteDetailsActivity
-import ru.vsu.cs.zmaev.diary.services.MobileListenerService
 
 class MainActivity : AppCompatActivity(), OnDataChangedListener {
 
@@ -68,7 +64,7 @@ class MainActivity : AppCompatActivity(), OnDataChangedListener {
 
         binding.sendButton.setOnClickListener {
             val message = "Hello $num"
-            MobileListenerService().sendData(message, dataPath, this)
+            sendData(message)
             num++
         }
     }
@@ -94,6 +90,27 @@ class MainActivity : AppCompatActivity(), OnDataChangedListener {
                     """.trimIndent()
             )
         }
+    }
+
+    private fun sendData(message: String) {
+        val dataMap = PutDataMapRequest.create(dataPath)
+        dataMap.dataMap.putString("message", message)
+        val request = dataMap.asPutDataRequest()
+        request.setUrgent()
+        val dataItemTask = Wearable.getDataClient(this).putDataItem(request)
+        dataItemTask
+            .addOnSuccessListener { dataItem ->
+                Log.d(
+                    TAG,
+                    "Sending message was successful: $dataItem"
+                )
+            }
+            .addOnFailureListener { e ->
+                Log.e(
+                    TAG,
+                    "Sending message failed: $e"
+                )
+            }
     }
 
     override fun onDataChanged(dataEventBuffer: DataEventBuffer) {
