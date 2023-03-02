@@ -2,6 +2,8 @@ package ru.vsu.cs.zmaev.diary.screens.main
 
 import android.app.Application
 import android.os.Bundle
+import android.util.Log
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.databinding.DataBindingUtil
@@ -11,16 +13,24 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import ru.vsu.cs.zmaev.diary.R
+import com.google.android.gms.wearable.DataClient.OnDataChangedListener
+import com.google.android.gms.wearable.DataEvent
+import com.google.android.gms.wearable.DataEventBuffer
+import com.google.android.gms.wearable.DataMapItem
+import com.google.android.gms.wearable.Wearable
 import ru.vsu.cs.zmaev.diary.databinding.ActivityMainBinding
 import ru.vsu.cs.zmaev.diary.screens.details.NoteDetailsActivity
+import ru.vsu.cs.zmaev.diary.services.MobileListenerService
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), OnDataChangedListener {
 
     private lateinit var binding: ActivityMainBinding
 
     private lateinit var toolbar: Toolbar
     private lateinit var fab: FloatingActionButton
     private lateinit var recyclerView: RecyclerView
+
+    private lateinit var logger: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,6 +40,8 @@ class MainActivity : AppCompatActivity() {
         fab = binding.fab
         toolbar = binding.toolbar
         recyclerView = binding.list
+        logger = binding.logger
+
         val linearLayoutManager = LinearLayoutManager(
             this,
             RecyclerView.VERTICAL,
@@ -53,5 +65,61 @@ class MainActivity : AppCompatActivity() {
         mainViewModel.noteLiveData.observe(this) { notes ->
             adapter.setItems(notes)
         }
+
+        binding.sendButton.setOnClickListener {
+            val message = "Hello $num"
+            MobileListenerService().sendData(message, dataPath, this)
+            num++
+        }
+    }
+
+    // add data listener
+    public override fun onResume() {
+        super.onResume()
+        Wearable.getDataClient(this).addListener(this)
+    }
+
+    //remove data listener
+    public override fun onPause() {
+        super.onPause()
+        Wearable.getDataClient(this).removeListener(this)
+    }
+
+    fun logThis(newInfo: String?) {
+        if (newInfo!!.compareTo("") != 0) {
+            logger!!.append(
+                """
+                    
+                    $newInfo
+                    """.trimIndent()
+            )
+        }
+    }
+
+    override fun onDataChanged(dataEventBuffer: DataEventBuffer) {
+        Log.d(TAG, "onDataChanged: $dataEventBuffer")
+        for (event in dataEventBuffer) {
+            if (event.type == DataEvent.TYPE_CHANGED) {
+                val path = event.dataItem.uri.path
+                if (dataPath == path) {
+                    val dataMapItem = DataMapItem.fromDataItem(event.dataItem)
+                    val message = dataMapItem.dataMap.getString("message")
+                    Log.v(TAG, "Wear activity received message: $message")
+                    logThis(message)
+                } else {
+                    Log.e(TAG, "Unrecognized path: $path")
+                }
+            } else if (event.type == DataEvent.TYPE_DELETED) {
+                Log.v(TAG, "Data deleted : " + event.dataItem.toString())
+            } else {
+                Log.e(TAG, "Unknown data event Type = " + event.type)
+            }
+        }
+    }
+
+    companion object {
+        var num = 0
+        const val dataPath = "/data_path"
+        const val TAG = "Mobile MainActivity"
     }
 }
